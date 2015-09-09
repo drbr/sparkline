@@ -1,0 +1,98 @@
+<html>
+<body>
+<script>
+
+  function parseQueryString(str) {
+    str = str.split('?').slice(-1)[0]; // remove the question mark
+    var paramStrings = str.split('&');
+    return paramStrings.reduce(function(params, paramString) {
+      var keyValueString = paramString.split('=');
+      var key = keyValueString[0];
+      var value = keyValueString[1];
+      params[key] = parseInt(value, 10);
+      return params;
+    }, {});
+  }
+
+  function randomPoints(numPoints, maxValue) {
+    var normalizedMaxValue = maxValue + 1;
+    return Array.apply(null, Array(numPoints)).map(function () {
+      return Math.floor(Math.random() * normalizedMaxValue);
+    });
+  }
+
+  var Normalize = (function() {
+    function Normalize(values) {
+        this.n = values.length - 1;
+        this.min = Math.min.apply(null, values);
+        var max = Math.max.apply(null, values);
+        this.range = max - this.min;
+        this.height = 50;
+        this.width = 235;
+    }
+
+    Normalize.prototype.y = function(value) {
+      return (value - this.min) * this.height / this.range || 0;
+    };
+
+    Normalize.prototype.x = function(i) {
+      return i * this.width / this.n || 0;
+    };
+
+    return Normalize;
+  })();
+
+  function movement(name, x, y) {
+    return name + x + ',' + y;
+  }
+
+  function randomSparkline() {
+    var params = parseQueryString(window.location.search);
+    var points = randomPoints(params.numPoints, params.maxValue);
+
+    var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('width', 235);
+    svg.setAttribute('height', 50);
+    svg.setAttribute('style', 'padding: 10px;');
+    svg.setAttribute('transform', 'scale(0, -1) translate(0, -50)');
+
+    svg.appendChild(path(points));
+    svg.appendChild(circle(points, points.length - 1));
+
+    return svg;
+  }
+
+  function path(values) {
+    var n = new Normalize(values);
+    var firstMovement = movement('M', n.x(0), n.y(values[0]));
+    
+    var movements = values.slice(1).reduce(function(movements, value, i) {
+      return movements + movement('L', n.x(i + 1), n.y(value))
+    }, firstMovement);
+
+    var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('stroke', 'rgb(165, 0, 18)');
+    path.setAttribute('stroke-width', 3);
+    path.setAttribute('fill', 'none');
+    path.setAttribute('d', movements);
+    return path;
+  }
+
+  function circle(values, i) {
+    var n = new Normalize(values);
+    var circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    circle.setAttribute('cx', n.x(i));
+    circle.setAttribute('cy', n.y(values[i]));
+    circle.setAttribute('r', 5);
+    circle.setAttribute('stroke', 'black');
+    circle.setAttribute('stroke-width', 3);
+    circle.setAttribute('fill', 'rgb(165, 0, 18');
+    return circle;
+  }
+
+  var sl = randomSparkline();
+  document.body.appendChild(sl);
+
+</script>
+</body>
+</html>
