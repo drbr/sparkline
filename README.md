@@ -2,7 +2,7 @@
 A prototype to make sparklines using SVG
 
 Try it out here:
-[https://drbr.github.io/sparkline/index.html](https://drbr.github.io/sparkline./index.html)
+[https://drbr.github.io/sparkline/index.html](https://drbr.github.io/sparkline/index.html)
 
 This prototype will generate some random data points and then graph them as a sparkline.
 Use the URL parameters to generate the points as follows:
